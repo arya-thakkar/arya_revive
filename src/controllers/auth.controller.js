@@ -178,26 +178,46 @@ async function forgotPassword(req, res, next) {
 async function resetPassword(req, res, next) {
   try {
     const { new_password } = req.body;
-    if (!new_password || new_password.length < 8)
+    if (!new_password || new_password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
 
-    // We must use a fresh client to ensure the token from req.token is correctly applied
+    if (!req.token) {
+      console.error('[RESET PASSWORD] No token provided in request');
+      return res.status(401).json({ error: 'Authentication token missing. Please use the link from your email.' });
+    }
+
+    // Initialize a dedicated client for this specific user request
     const { createClient } = require('@supabase/supabase-js');
-    const userClient = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
-    );
+    const userClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+      auth: { persistSession: false }
+    });
 
-    await userClient.auth.setSession({
+    // Set the session using the token we got from the AuthCallback -> Frontend -> Request Header
+    const { data: sessionData, error: sessionError } = await userClient.auth.setSession({
       access_token: req.token,
       refresh_token: req.body.refresh_token || '',
     });
 
-    const { error } = await userClient.auth.updateUser({ password: new_password });
-    if (error) return res.status(400).json({ error: error.message });
+    if (sessionError) {
+      console.error('[RESET PASSWORD] Session setup failed:', sessionError.message);
+      return res.status(401).json({ error: 'Session expired or invalid. Please request a new link.' });
+    }
+
+    // Now update the user's password in their own authenticated context
+    const { error: updateError } = await userClient.auth.updateUser({ password: new_password });
     
+    if (updateError) {
+      console.error('[RESET PASSWORD] Update failed:', updateError.message);
+      return res.status(400).json({ error: updateError.message });
+    }
+    
+    console.log('[RESET PASSWORD] Success for user:', sessionData.user?.email);
     res.json({ message: 'Password updated. Please log in again.' });
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error('[RESET PASSWORD] Unexpected error:', err.message);
+    next(err); 
+  }
 }
 
 async function resendVerification(req, res, next) {

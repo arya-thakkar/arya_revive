@@ -4,25 +4,20 @@ const { generate21DayPlan } = require('../services/ai.service');
 async function generatePlan(req, res, next) {
   try {
     const { addictionId } = req.params;
+    const userId = req.user.id;
 
     const { data: addiction, error: fetchError } = await supabaseAdmin
       .from('addictions')
       .select('*')
       .eq('id', addictionId)
-      .eq('user_id', req.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (fetchError || !addiction) {
       return res.status(404).json({ error: 'Addiction not found or unauthorized' });
     }
 
-    let planData;
-    try {
-      planData = await generate21DayPlan(addiction);
-    } catch (aiError) {
-      console.error('AI plan generation failed:', aiError.message);
-      return res.status(502).json({ error: 'AI service unavailable. Please try again.' });
-    }
+    const planData = await generate21DayPlan(addiction);
 
     const { data: plan, error: upsertError } = await supabaseAdmin
       .from('plans')

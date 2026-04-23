@@ -24,4 +24,11 @@ const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   },
 });
 
+// Startup validation for Keys
+if (SUPABASE_ANON_KEY === SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('\n⚠️  [CONFIG WARNING] SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are identical!');
+  console.warn('   This will cause admin functions (like forgot password links) to fail.');
+  console.warn('   Please ensure you have the correct Service Role key from your Supabase dashboard.\n');
+}
+
 module.exports = { supabase, supabaseAdmin };

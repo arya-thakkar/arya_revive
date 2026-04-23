@@ -67,7 +67,10 @@ async function createAddiction(req, res, next) {
       .select()
       .single();
 
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+      console.error('[ADDICTION CREATE ERROR] Supabase error:', error.message);
+      return res.status(400).json({ error: error.message });
+    }
 
     res
       .status(201)

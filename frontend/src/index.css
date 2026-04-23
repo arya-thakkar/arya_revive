@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: #0B0F19; /* very dark blue/slate */
+    color: #F8FAFC;
+    @apply font-sans antialiased leading-relaxed;
+  }
+  
+  .light body {
+    background-color: #0B0F19; 
+    color: #F8FAFC;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  input, textarea, select {
+    @apply outline-none transition-colors duration-200;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  }
+}
+
+@layer components {
+  /* Button Standards */
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-xl px-5 py-3 text-base font-medium transition-all duration-200 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-5 py-3 text-base font-medium transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Form Standards */
+  .input-field {
+    @apply border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200 w-full focus:outline-none dark:text-white shadow-sm;
+  }
+
+  .label {
+    @apply block text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2;
+  }
+
+  /* Structural Standards */
+  .card-base {
+    @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-card dark:shadow-card-dark transition-all duration-300;
+  }
+
+  .badge-base {
+    @apply text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+}

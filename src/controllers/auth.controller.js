@@ -151,7 +151,7 @@ async function forgotPassword(req, res, next) {
 
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery', email,
-      options: { redirectTo: `${process.env.FRONTEND_URL}/reset-password` },
+      options: { redirectTo: `${process.env.FRONTEND_URL}/auth/callback` },
     });
 
     if (error) {
@@ -181,8 +181,21 @@ async function resetPassword(req, res, next) {
     if (!new_password || new_password.length < 8)
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
 
-    const { error } = await supabase.auth.updateUser({ password: new_password });
+    // We must use a fresh client to ensure the token from req.token is correctly applied
+    const { createClient } = require('@supabase/supabase-js');
+    const userClient = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY
+    );
+
+    await userClient.auth.setSession({
+      access_token: req.token,
+      refresh_token: req.body.refresh_token || '',
+    });
+
+    const { error } = await userClient.auth.updateUser({ password: new_password });
     if (error) return res.status(400).json({ error: error.message });
+    
     res.json({ message: 'Password updated. Please log in again.' });
   } catch (err) { next(err); }
 }

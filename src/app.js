@@ -26,7 +26,8 @@ app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true)
     if (origin.startsWith('http://localhost')) return callback(null, true)
-    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true)
+    const allowedOrigin = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
+    if (allowedOrigin && origin === allowedOrigin) return callback(null, true)
     callback(new Error(`CORS blocked: ${origin}`))
   },
   credentials: true,
